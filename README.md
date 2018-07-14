@@ -33,6 +33,7 @@
     
 # week-2 
 
+[hw2]part1(https://stephanie0324.github.io/cs-summer-school/week-2/hw2part-1.html)
 
 * in class
  
