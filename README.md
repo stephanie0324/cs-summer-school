@@ -34,6 +34,7 @@
 # week-2 
 
 [hw2part1](https://stephanie0324.github.io/cs-summer-school/week-2/hw2part-1.html)
+
 [hw2part2](https://stephanie0324.github.io/cs-summer-school/week-2/hw2part-2.html)
 
 * in class
