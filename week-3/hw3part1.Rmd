@@ -1,0 +1,160 @@
+---
+title: "Is happiness correlated with open data?"
+author: "stephanie"
+date: "2018/7/22"
+output: html_document
+---
+#Data from :https://www.kaggle.com/mrisdal/happiness-and-open-data/notebook
+```{r}
+countriesdata = read.csv("../week-3/data/countries.csv")
+scoredata = read.csv("../week-3/data/scores.csv")
+data2015 = read.csv("../week-3/data/2015.csv")
+data2016 = read.csv("../week-3/data/2016.csv")
+data2017 = read.csv("../week-3/data/2017.csv")
+```
+
+#資料重新命名與合併
+
+1.colnames()將兩個檔案的名稱改為"country"
+
+2.left_join()數據的合併
+
+3.select()我們輸入資料框的名稱，以及想要選取的變數 
+
+
+```{r}
+library(dplyr)
+colnames(countriesdata)[2] <- "Country"
+country_2015<- countriesdata %>%
+  left_join(data2015, by = "Country") %>%
+  mutate(Country = factor(Country)) %>%
+  select(Country, Region, X2015.Score, Happiness.Score, Economy..GDP.per.Capita., 
+         Family, Health..Life.Expectancy., Freedom, Trust..Government.Corruption., 
+         Generosity, Dystopia.Residual)
+colnames(country_2015) <- c("Country", "Region", "Openness", "Happiness", "GDP", "Family", "Health", "Freedom", "Trust", "Generosity", "DystopiaResidual")
+```
+#用formattable看資料開放，快樂與其他資料的比例
+1.找出最開放的國家
+
+2.arrange(desc())照降冪排列
+
+3.mutate_each()
+  
+  *对每一列运行窗口函数 - mutate_each()
+  mutate_each(iris, funs(min_rank), [var1,var2])
+
+  *窗口函数
+    
+    --between(): 数据在a、b之间
+  
+    --lag: 把除最后一位以外的所有数据延后，第一个元素为NA
+  
+    --ntile: 把数据分为n分
+  
+    --lead: 把除第一个值以外的所有元素提前，最后一位为NA
+  
+    --percent_rank: 把数据在[0,1]中重组，并排序
+  
+    --row_number: 排序。并列时将并列数在前的序号在前
+  
+    --dense_rank: 无缝排序
+  
+    --min_rank: 排序，并列时，其他序号延号
+
+      作者：Jerry_Cai
+    
+      链接：https://www.jianshu.com/p/23634b889998
+    
+      來源：简书 
+    
+      简书著作权归作者所有，任何形式的转载都请联系作者获得授权并注明出处。
+      
+4.formattable
+  
+   *color_tile此函數用來按照數值輸出量進行背景填充。
+
+   *formatter此函數提供可自訂的字體格式顯示
+  
+   *將資料用顏色分類(沒有深綠、紫色、淡紅色)
+
+```{r}
+library(formattable)
+country_2015 %>%
+  arrange(desc(Openness)) %>%
+  mutate_each(funs(round(., 2)), -c(Country, Region, Openness)) %>%
+  head(10) %>%
+  formattable(list(
+    Openness = color_bar("red"),
+    Happiness = color_bar("orange"),
+    GDP = color_bar("yellow"),
+    Family = color_bar("lightgreen"),
+    Health = color_bar("lightblue"),
+    Freedom = color_bar("skyblue"),
+    Trust = color_bar("deepskyblue"),
+    Generosity = color_bar("violet"),
+    DystopiaResidual = color_bar("pink")
+  ), align = "l")
+```
+
+#看出資料開放與開心的相關性
+
+1. 使用點圖，以區域做顏色分類，大小為2
+
+2.geom_smooth加上趨勢線(lm =回歸分析)
+
+3.viridis調色盤
+```{r}
+library(ggplot2)
+library(ggthemes)
+library(viridis)
+
+
+
+ggplot(country_2015, 
+  aes(x = Openness, 
+      y = Happiness)) +
+  geom_point(aes(colour = Region),
+             size = 2)+
+  geom_smooth(method="lm") +
+  labs(x = "Openness Score",
+       y = "Happiness Score",
+       title = "Are open data friendly countries happy countries?",
+       subtitle = "Data openness and happiness by country in 2015") +
+  scale_color_viridis(discrete = T) +
+  theme_minimal() +
+  theme(text = element_text(size=16))
+```
+
+#找出與資料開放有相關性的東西
+
+1.corrplot 相關矩陣會製成圖
+
+2.cor()計算相關矩陣
+
+ *cor(x, method = c("pearson", "kendall", "spearman"))，如果数据有缺失值，用cor(x, method = 
+  "pearson", use = "complete.obs")。
+
+ *Pearson 相關常用來呈現連續型(continous)變數之間的關聯性，尤其在變數符合常態分配的假設下，最爲精
+          確。
+ 
+ *Spearman相關則不需符合常態，僅要求變數的資料型態至少爲有序的(ordinal)。另一個選擇上的重點爲在資
+          料具有離群值時(outliers)。
+          
+3.選擇Openness, Happiness, GDP, Family, Health, Freedom, Trust, Generosity, DystopiaResidual這些
+  項目作比較
+   
+4.as.numeric()將項目換成數值
+ 
+ 
+
+```{r}
+library(corrplot)
+country_2015_corr <- country_2015 %>%
+  select(Openness, Happiness, GDP, Family, Health, 
+         Freedom, Trust, Generosity, DystopiaResidual) %>%
+  mutate(Openness = as.numeric(Openness))
+
+od_corr <- cor(country_2015_corr, use = "complete", method = "pearson")
+
+corrplot(od_corr)
+```
