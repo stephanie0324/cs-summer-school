@@ -136,8 +136,8 @@ data2015 = read.csv(&quot;../week-3/data/2015.csv&quot;)
 data2016 = read.csv(&quot;../week-3/data/2016.csv&quot;)
 data2017 = read.csv(&quot;../week-3/data/2017.csv&quot;)</code></pre>
 </div>
-<div id="rename-data" class="section level1">
-<h1>Rename data</h1>
+<div class="section level1">
+<h1>資料重新命名與合併</h1>
 <p>1.colnames()將兩個檔案的名稱改為“country”</p>
 <p>2.left_join()數據的合併</p>
 <p>3.select()我們輸入資料框的名稱，以及想要選取的變數</p>
@@ -610,9 +610,7 @@ Western Europe
 </div>
 <div class="section level1">
 <h1>看出資料開放與開心的相關性</h1>
-<ol style="list-style-type: decimal">
-<li>使用點圖，以區域做顏色分類，大小為2</li>
-</ol>
+<p>1.使用點圖，以區域做顏色分類，大小為2</p>
 <p>2.geom_smooth加上趨勢線(lm =回歸分析)</p>
 <p>3.viridis調色盤</p>
 <pre class="r"><code>library(ggplot2)
