@@ -55,4 +55,18 @@
   7. 文字雲的爬蟲程式不讓我執行
   8. 助教神救援終於做好了
   9. 7/15 完成了兩份作業也上傳了
+  
+# week-3
 
+[hw3part1](https://stephanie0324.github.io/cs-summer-school/week-3/hw3part1.html)
+
+* in class
+  
+  閱讀 Kaggle Script，用 Rmd 做一份剪報
+  以 TFIDF -> PCA -> K-means 流程完成文字探勘報告
+  
+* at home
+
+1. 7/22 第一次跟同學約出來討論作業
+2. 7/22 交出week-3第一份作業
+3. 
