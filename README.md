@@ -40,6 +40,7 @@
 * in class
 
   學習使用ggplot2
+  
   學習爬文 創建文字雲
  
   1. 這週請假
@@ -61,8 +62,11 @@
 [hw3part1](https://stephanie0324.github.io/cs-summer-school/week-3/hw3part1.html)
 
 * in class
+
+  這週請假
   
   閱讀 Kaggle Script，用 Rmd 做一份剪報
+  
   以 TFIDF -> PCA -> K-means 流程完成文字探勘報告
   
 * at home
