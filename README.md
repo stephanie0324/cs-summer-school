@@ -59,7 +59,7 @@
   
 # week-3
 
-[hw3part1](https://stephanie0324.github.io/cs-summer-school/week-3/hw3part1.html)
+[EDA](https://stephanie0324.github.io/cs-summer-school/week-3/hw3part1.html)
 
 * in class
 
