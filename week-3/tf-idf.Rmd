@@ -1,0 +1,166 @@
+---
+title: "tfidf"
+author: "stephanie"
+date: "2018/7/23"
+output: html_document
+---
+1.爬文
+```{r}
+library(RCurl)
+library(XML)
+from <- 6943 # 2018-07-19
+to   <- 6944 # 2018-07-20
+prefix = "https://www.ptt.cc/bbs/movie/index"
+
+data <- list()
+for( id in c(from:to) )
+{
+  url  <- paste0( prefix, as.character(id), ".html" )
+  html <- htmlParse( getURL(url) )
+  url.list <- xpathSApply( html, "//div[@class='title']/a[@href]", xmlAttrs )
+  data <- rbind( data, as.matrix(paste('https://www.ptt.cc', url.list, sep='')) )
+}
+data <- unlist(data)
+
+head(data)
+
+```
+
+2.利用所有文章的網址去抓所有文章內文, 並解析出文章的內容並依照 hour 合併儲存。
+```{r}
+library(dplyr)
+library(RCurl)
+library(XML)
+getdoc <- function(url)
+{
+  html <- htmlParse( getURL(url) )
+  doc  <- xpathSApply( html, "//div[@id='main-content']", xmlValue )
+  time <- xpathSApply( html, "//*[@id='main-content']/div[4]/span[2]", xmlValue )
+  temp <- gsub( "  ", " 0", unlist(time) )
+  part <- strsplit( temp, split=" ", fixed=T )
+  timestamp <- part[[1]][4]
+  timestamp <- strsplit( timestamp, split=":", fixed=T )
+  hour <- timestamp[[1]][1]
+  name <- paste0('./DATA2/', hour, ".txt")
+  write(doc, name, append = TRUE)
+}
+sapply(data, getdoc)
+```
+
+3.建立文本資料結構與基本文字清洗
+```{r}
+library(tm)
+library(tmcn)
+d.corpus <- Corpus( DirSource("./DATA2") )
+d.corpus <- tm_map(d.corpus, removePunctuation)
+d.corpus <- tm_map(d.corpus, removeNumbers)
+d.corpus <- tm_map(d.corpus, function(word) {
+  gsub("[A-Za-z0-9]", "", word)
+})
+```
+
+4.進行斷詞，並依照日期建立文本矩陣
+```{r}
+library(jiebaR)
+library(jiebaRD)
+jieba_tokenizer = function(d)
+{
+  unlist( segment(d[[1]], worker()) )
+}
+seg = lapply(d.corpus, jieba_tokenizer)
+
+count_token = function(d)
+{
+  as.data.frame(table(d))
+}
+tokens = lapply(seg, count_token)
+
+n = length(seg)
+TDM = tokens[[1]]
+colNames <- names(seg)
+colNames <- gsub(".txt", "", colNames)
+for( id in c(2:n) )
+{ 
+  TDM = merge(TDM, tokens[[id]], by ="d", all = TRUE)
+  names(TDM) = c('d', colNames[1:id])
+}
+TDM[is.na(TDM)] <- 0
+library(knitr)
+kable(head(TDM))
+kable(tail(TDM))
+```
+
+5.tdm to tfidf
+##將TDM轉成numeric
+###一行一行轉成numeric，所以使用lapply
+###轉出來並不是矩陣
+###先轉成data.frame，因為matrix需要用data轉
+###再轉成matrix
+```{r}
+library(Matrix)
+library(knitr)
+tf <- apply(as.matrix(TDM[,2:(n+1)]), 2, sum)
+
+library(Matrix)
+idfCal <- function(word_doc)
+{ 
+  log2( n / nnzero(word_doc) ) 
+}
+idf <- apply(as.matrix(TDM[,2:(n+1)]), 1, idfCal)
+
+doc.tfidf <- TDM
+tempY = matrix(rep(c(as.matrix(tf)), each = length(idf)), nrow = length(idf))
+tempX = matrix(rep(c(as.matrix(idf)), each = length(tf)), ncol = length(tf), byrow = TRUE)
+doc.tfidf[,2:(n+1)] <- (doc.tfidf[,2:(n+1)] / tempY) * tempX
+
+stopLine = rowSums(doc.tfidf[,2:(n+1)])
+delID = which(stopLine == 0)
+
+kable(head(doc.tfidf[delID,1]))
+kable(tail(doc.tfidf[delID,1]))
+TDM = TDM[-delID,]
+doc.tfidf = doc.tfidf[-delID,]
+```
+
+6.TF-IDF Hours 文章取得的重要關鍵字
+```{r}
+TopWords = data.frame()
+for( id in c(1:n) )
+{
+  dayMax = order(doc.tfidf[,id+1], decreasing = TRUE)
+  showResult = t(as.data.frame(doc.tfidf[dayMax[1:5],1]))
+  TopWords = rbind(TopWords, showResult)
+}
+rownames(TopWords) = colnames(doc.tfidf)[2:(n+1)]
+TopWords = droplevels(TopWords)
+kable(TopWords)
+```
+
+7.TF-IDF Hours 文章取得的重要關鍵字 TDM merge 視覺化
+```{r}
+TDM$d = as.character(TDM$d)
+AllTop = as.data.frame( table(as.matrix(TopWords)) )
+AllTop = AllTop[order(AllTop$Freq, decreasing = TRUE),]
+
+kable(head(AllTop))
+
+
+TopNo = 5
+tempGraph = data.frame()
+for( t in c(1:TopNo) )
+{
+  word = matrix( rep(c(as.matrix(AllTop$Var1[t])), each = n), nrow = n )
+  temp = cbind( colnames(doc.tfidf)[2:(n+1)], t(TDM[which(TDM$d == AllTop$Var1[t]), 2:(n+1)]), word )
+  colnames(temp) = c("hour", "freq", "words")
+  tempGraph = rbind(tempGraph, temp)
+  names(tempGraph) = c("hour", "freq", "words")
+}
+
+library(ggplot2)
+library(varhandle)
+par(family=("Heiti TC Light"))
+tempGraph$freq = unfactor(tempGraph$freq)
+ggplot(tempGraph, aes(hour, freq)) + 
+  geom_point(aes(color = words, shape = words), size = 5) +
+  geom_line(aes(group = words, linetype = words))
+```
