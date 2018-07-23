@@ -61,6 +61,10 @@
 
 [EDA](https://stephanie0324.github.io/cs-summer-school/week-3/hw3part1.html)
 
+[tf-idf](https://stephanie0324.github.io/cs-summer-school/week-3/tf-idf.html)
+
+[tfidf-pca-kmeans](https://stephanie0324.github.io/cs-summer-school/week-3/tfidf-pca-kmeans.html)
+
 * in class
 
   這週請假
@@ -73,4 +77,7 @@
 
 1. 7/22 第一次跟同學約出來討論作業
 2. 7/22 交出week-3第一份作業
-3. 
+3. 7/22 寫了10小時因為有檔案放錯資料夾而程式跑不動
+4. 7/23瘋狂debug
+5. 7/23在網路上找資料，處理了一些問題但文字亂碼仍然無法解決
+6.
