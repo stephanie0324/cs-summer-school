@@ -96,7 +96,7 @@ t = as.data.frame(t(doc.tfidf))
 t = t[-1,]
 t = apply(t, 2, as.numeric)
 pcat = prcomp(t)
-g <- ggbiplot(pcat, obs.scale = 1, var.scale = 1, ellipse = TRUE, circle = TRUE)
+g <- ggbiplot(pcat, obs.scale = 1 , var.scale = 1, ellipse = TRUE, circle = TRUE)
 fviz_pca_ind(pcat)
 ```
 
@@ -107,3 +107,4 @@ cl <- kmeans(kmeansData, 3)
 plot(kmeansData, col = cl$cluster)
 points(cl$centers, col = 1:2, pch = 15, cex = 3)
 ```
+
