@@ -128,194 +128,21 @@ $(document).ready(function () {
 </div>
 
 
-<pre class="r"><code>#PTT 網路爬蟲抓出所有文章內文所對應的網址
-library(RCurl)</code></pre>
-<pre><code>## Loading required package: bitops</code></pre>
-<pre class="r"><code>library(XML)
-from &lt;- 6943 # 2018-07-19
-to   &lt;- 6944 # 2018-07-20
-prefix = &quot;https://www.ptt.cc/bbs/movie/index&quot;
-
-data &lt;- list()
-for( id in c(from:to) )
-{
-  url  &lt;- paste0( prefix, as.character(id), &quot;.html&quot; )
-  html &lt;- htmlParse( getURL(url) )
-  url.list &lt;- xpathSApply( html, &quot;//div[@class='title']/a[@href]&quot;, xmlAttrs )
-  data &lt;- rbind( data, as.matrix(paste('https://www.ptt.cc', url.list, sep='')) )
-}
-data &lt;- unlist(data)
-
-head(data)</code></pre>
-<pre><code>## [1] &quot;https://www.ptt.cc/bbs/movie/M.1532009829.A.DB9.html&quot;
-## [2] &quot;https://www.ptt.cc/bbs/movie/M.1532011039.A.678.html&quot;
-## [3] &quot;https://www.ptt.cc/bbs/movie/M.1532012066.A.5DC.html&quot;
-## [4] &quot;https://www.ptt.cc/bbs/movie/M.1532014105.A.B38.html&quot;
-## [5] &quot;https://www.ptt.cc/bbs/movie/M.1532015763.A.3FD.html&quot;
-## [6] &quot;https://www.ptt.cc/bbs/movie/M.1532015838.A.8FC.html&quot;</code></pre>
-<div id="--hour-" class="section level1">
-<h1>利用所有文章的網址去抓所有文章內文, 並解析出文章的內容並依照 hour 合併儲存。</h1>
-<pre class="r"><code>library(dplyr)</code></pre>
-<pre><code>## Warning: package 'dplyr' was built under R version 3.5.1</code></pre>
-<pre><code>## 
-## Attaching package: 'dplyr'</code></pre>
-<pre><code>## The following objects are masked from 'package:stats':
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(RCurl)
-library(XML)
-getdoc &lt;- function(url)
-{
-  html &lt;- htmlParse( getURL(url) )
-  doc  &lt;- xpathSApply( html, &quot;//div[@id='main-content']&quot;, xmlValue )
-  time &lt;- xpathSApply( html, &quot;//*[@id='main-content']/div[4]/span[2]&quot;, xmlValue )
-  temp &lt;- gsub( &quot;  &quot;, &quot; 0&quot;, unlist(time) )
-  part &lt;- strsplit( temp, split=&quot; &quot;, fixed=T )
-  timestamp &lt;- part[[1]][4]
-  timestamp &lt;- strsplit( timestamp, split=&quot;:&quot;, fixed=T )
-  hour &lt;- timestamp[[1]][1]
-  name &lt;- paste0('./DATA2/', hour, &quot;.txt&quot;)
-  write(doc, name, append = TRUE)
-}
-sapply(data, getdoc)</code></pre>
-<pre><code>## $`https://www.ptt.cc/bbs/movie/M.1532009829.A.DB9.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532011039.A.678.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532012066.A.5DC.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532014105.A.B38.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532015763.A.3FD.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532015838.A.8FC.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532016416.A.3AC.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532017424.A.56F.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532017481.A.857.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532017871.A.8E2.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532018445.A.C48.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532018597.A.2A9.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532018605.A.667.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532019419.A.BDF.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532019757.A.FC8.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532020988.A.7C6.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532021375.A.DCF.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532021967.A.355.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532022777.A.00B.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532023136.A.D01.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532025298.A.561.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532025652.A.593.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532041504.A.8D0.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532043101.A.2FB.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532051472.A.9BB.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532052242.A.F59.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532053165.A.47D.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532053656.A.9AE.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532056003.A.504.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532058372.A.E18.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532059125.A.22E.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532060311.A.64F.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532060592.A.1C7.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532063193.A.44E.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532064291.A.2B2.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532064506.A.B66.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532066381.A.7F3.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532069215.A.2EA.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532069799.A.AD7.html`
-## NULL
-## 
-## $`https://www.ptt.cc/bbs/movie/M.1532071349.A.167.html`
-## NULL</code></pre>
-</div>
-<div class="section level1">
-<h1>建立文本資料結構與基本文字清洗</h1>
+<ol style="list-style-type: decimal">
+<li>INPUT DATA</li>
+</ol>
 <pre class="r"><code>library(tm)</code></pre>
 <pre><code>## Loading required package: NLP</code></pre>
 <pre class="r"><code>library(tmcn)</code></pre>
 <pre><code>## # tmcn Version: 0.2-12</code></pre>
-<pre class="r"><code>d.corpus &lt;- Corpus( DirSource(&quot;./DATA2&quot;) )
+<pre class="r"><code>library(NLP)
+d.corpus &lt;- Corpus( DirSource(&quot;./DATA2&quot;) )
 d.corpus &lt;- tm_map(d.corpus, removePunctuation)
 d.corpus &lt;- tm_map(d.corpus, removeNumbers)
 d.corpus &lt;- tm_map(d.corpus, function(word) {
   gsub(&quot;[A-Za-z0-9]&quot;, &quot;&quot;, word)
 })</code></pre>
-</div>
-<div class="section level1">
-<h1>進行斷詞，並依照日期建立文本矩陣</h1>
+<p>2.進行斷詞，並依照日期建立文本矩陣</p>
 <pre class="r"><code>library(jiebaR)</code></pre>
 <pre><code>## Loading required package: jiebaRD</code></pre>
 <pre class="r"><code>library(jiebaRD)
@@ -587,22 +414,8 @@ kable(head(TDM))</code></pre>
 </tr>
 </tbody>
 </table>
-</div>
 <div id="tdm-to-tfidf" class="section level1">
 <h1>tdm to tfidf</h1>
-<div id="tdmnumeric" class="section level2">
-<h2>將TDM轉成numeric</h2>
-<div id="numericlapply" class="section level3">
-<h3>一行一行轉成numeric，所以使用lapply</h3>
-</div>
-<div class="section level3">
-<h3>轉出來並不是矩陣</h3>
-</div>
-<div id="data.framematrixdata" class="section level3">
-<h3>先轉成data.frame，因為matrix需要用data轉</h3>
-</div>
-<div id="matrix" class="section level3">
-<h3>再轉成matrix</h3>
 <pre class="r"><code>library(Matrix)
 library(knitr)
 tf &lt;- apply(as.matrix(TDM[,2:(n+1)]), 2, sum)
@@ -689,8 +502,6 @@ kable(head(doc.tfidf[delID,1]))</code></pre>
 <pre class="r"><code>TDM = TDM[-delID,]
 doc.tfidf = doc.tfidf[-delID,]</code></pre>
 </div>
-</div>
-</div>
 <div id="pca" class="section level1">
 <h1>pca</h1>
 <pre class="r"><code>library(devtools)
@@ -704,17 +515,6 @@ library(factoextra)</code></pre>
 <pre><code>## Welcome! Related Books: `Practical Guide To Cluster Analysis in R` at https://goo.gl/13EFCZ</code></pre>
 <pre class="r"><code>library(ggbiplot)</code></pre>
 <pre><code>## Loading required package: plyr</code></pre>
-<pre><code>## -------------------------------------------------------------------------</code></pre>
-<pre><code>## You have loaded plyr after dplyr - this is likely to cause problems.
-## If you need functions from both plyr and dplyr, please load plyr first, then dplyr:
-## library(plyr); library(dplyr)</code></pre>
-<pre><code>## -------------------------------------------------------------------------</code></pre>
-<pre><code>## 
-## Attaching package: 'plyr'</code></pre>
-<pre><code>## The following objects are masked from 'package:dplyr':
-## 
-##     arrange, count, desc, failwith, id, mutate, rename, summarise,
-##     summarize</code></pre>
 <pre><code>## Loading required package: scales</code></pre>
 <pre><code>## Loading required package: grid</code></pre>
 <pre class="r"><code>library(plyr)

@@ -4,53 +4,12 @@ author: "stephanie"
 date: "2018/7/22"
 output: html_document
 ---
-1.爬文
-```{r}
-library(RCurl)
-library(XML)
-from <- 6943 # 2018-07-19
-to   <- 6944 # 2018-07-20
-prefix = "https://www.ptt.cc/bbs/movie/index"
 
-data <- list()
-for( id in c(from:to) )
-{
-  url  <- paste0( prefix, as.character(id), ".html" )
-  html <- htmlParse( getURL(url) )
-  url.list <- xpathSApply( html, "//div[@class='title']/a[@href]", xmlAttrs )
-  data <- rbind( data, as.matrix(paste('https://www.ptt.cc', url.list, sep='')) )
-}
-data <- unlist(data)
-
-head(data)
-
-```
-
-2.利用所有文章的網址去抓所有文章內文, 並解析出文章的內容並依照 hour 合併儲存。
-```{r}
-library(dplyr)
-library(RCurl)
-library(XML)
-getdoc <- function(url)
-{
-  html <- htmlParse( getURL(url) )
-  doc  <- xpathSApply( html, "//div[@id='main-content']", xmlValue )
-  time <- xpathSApply( html, "//*[@id='main-content']/div[4]/span[2]", xmlValue )
-  temp <- gsub( "  ", " 0", unlist(time) )
-  part <- strsplit( temp, split=" ", fixed=T )
-  timestamp <- part[[1]][4]
-  timestamp <- strsplit( timestamp, split=":", fixed=T )
-  hour <- timestamp[[1]][1]
-  name <- paste0('./DATA2/', hour, ".txt")
-  write(doc, name, append = TRUE)
-}
-sapply(data, getdoc)
-```
-
-3.建立文本資料結構與基本文字清洗
+#INPUT DATA
 ```{r}
 library(tm)
 library(tmcn)
+library(NLP)
 d.corpus <- Corpus( DirSource("./DATA2") )
 d.corpus <- tm_map(d.corpus, removePunctuation)
 d.corpus <- tm_map(d.corpus, removeNumbers)
@@ -58,8 +17,7 @@ d.corpus <- tm_map(d.corpus, function(word) {
   gsub("[A-Za-z0-9]", "", word)
 })
 ```
-
-4.進行斷詞，並依照日期建立文本矩陣
+#建立矩陣
 ```{r}
 library(jiebaR)
 library(jiebaRD)
