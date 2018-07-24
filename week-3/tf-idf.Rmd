@@ -139,7 +139,6 @@ kable(TopWords)
 7.TF-IDF Hours 文章取得的重要關鍵字 TDM merge 視覺化
 ```{r}
 library(knitr)
-par(family = "Heiti TC Light")
 TDM$d = as.character(TDM$d)
 AllTop = as.data.frame( table(as.matrix(TopWords)) )
 AllTop = AllTop[order(AllTop$Freq, decreasing = TRUE),]
@@ -161,8 +160,9 @@ for( t in c(1:TopNo) )
 library(ggplot2)
 library(varhandle)
 library(showtext)
+par(family = "Heiti TC Light")
 tempGraph$freq = unfactor(tempGraph$freq)
-ggplot(tempGraph, aes(hour, freq),family="Heiti TC Light") + 
+ggplot(tempGraph, aes(hour, freq,family="Heiti TC Light")) + 
   geom_point(aes(color = words, shape = words), size = 5) +
   geom_line(aes(group = words, linetype = words))
 ```
