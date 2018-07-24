@@ -166,3 +166,13 @@ ggplot(tempGraph, aes(hour, freq,family="Heiti TC Light")) +
   geom_point(aes(color = words, shape = words), size = 5) +
   geom_line(aes(group = words, linetype = words))
 ```
+8.發文時間與發文量
+```{r}
+library(ggplot2)
+filenames = as.array(paste0("./DATA2/",colnames(doc.tfidf)[2:(n+1)],".txt"))
+sizeResult = apply(filenames, 1, file.size) / 1024
+showSize = data.frame(colnames(doc.tfidf)[2:(n+1)], sizeResult)
+names(showSize) = c("hour", "size_KB")
+
+ggplot(showSize, aes(x = hour, y = size_KB)) + geom_bar(stat="identity")
+```
