@@ -59,7 +59,8 @@
   
 # week-3
 
-[EDA](file:///Users/stephanie/Documents/GitHub/cs-summer-school/week-3/EDA.html)
+[EDA](https://stephanie0324.github.io/cs-summer-school/week-3/EDA.html)
+
 [tf-idf](https://stephanie0324.github.io/cs-summer-school/week-3/tf-idf.html)
 
 [tfidf-pca-kmeans](https://stephanie0324.github.io/cs-summer-school/week-3/tfidf-pca-kmeans.html)
