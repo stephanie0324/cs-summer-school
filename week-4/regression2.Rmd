@@ -1,0 +1,239 @@
+---
+title: "regression 2"
+author: "stephanie"
+date: "2018/7/29"
+output: html_document
+---
+
+#Read Data
+##將資料分出兩群：北歐、亞洲、美洲、非洲
+##將資料分成高gdp與低gdp兩組
+```{r}
+library(tidyverse)
+data2017 = read.csv("../week-3/data/2017.csv")
+highgdp<-c(data2017$Economy..GDP.per.Capita.>1)
+hgdp<-data2017[highgdp,]
+lowgdp<-c(data2017$Economy..GDP.per.Capita.<=1)
+lgdp<-data2017[lowgdp,]
+hgdp$GDP="hgdp"
+lgdp$GDP="lgdp"
+GDP=rbind(hgdp,lgdp)
+ne<-c(1,2,3,4,5)
+NE<-data2017[ne,]
+asia<-c(33,79,55,51,26)
+ASIA<-data2017[asia,]
+nra<-c(7,14)
+NRA<-data2017[nra,]
+afr<-c(101,84,95,53,128)
+AFR<-data2017[afr,]
+#使用rbind將同樣欄位的表格接合
+#創一個新欄位來分出兩個表格的不同
+#這樣在group的時候才可以分別
+ASIA$region = "ASIA"
+NE$region = "NE"
+NRA$region="NRA"
+AFR$region="AFR"
+CON = rbind(ASIA, NE,NRA,AFR)
+```
+
+#看資料結構與基本統計
+##str()列出資料內每個欄位的狀態
+##而summary()則給出每個欄位的「最大值」、「最小值」、「平均值」、「中位數」，「第一四分位數」
+```{r}
+str(GDP)
+head(GDP)
+summary(GDP)
+```
+
+#Happiness.Score vs GDP
+```{r}
+library(ggplot2)
+library(dplyr)
+ggplot(data=GDP,aes(x =GDP, y = Happiness.Score))+
+ geom_boxplot() + coord_flip() +
+ labs( y = 'happiness', x = 'gdp', 
+       title = 'gdp / happiness Score Box')
+```
+```{r}
+with(GDP, 
+     tapply(Happiness.Score, GDP,
+     function(x) 
+       c(mean(x) + c(-2, 2) * sd(x)/sqrt(length(x)))))
+```
+##以下用 t-test 檢驗不同gdp是否存在快樂指數差異
+```{r}
+#此函數會預設進行 Welch校正，以處理兩樣本變異數不相同的問題
+t.test(Happiness.Score ~ GDP,data= GDP)
+#可加上參數 var.equal=TRUE 來假設變異數同值(不做Welch校正)
+t.test(Happiness.Score ~ GDP, data = GDP, var.equal = TRUE)
+```
+#第二部分：分析地區/GDP的比較
+##（推測開心與地區有關係)
+```{r}
+library(Hmisc)
+CON$region <-factor(CON$region,
+                    levels = c('NE','ASIA','PCA','NRA','AFR'))
+tapply(CON$Happiness.Score,CON$region, mean)
+ggplot(data=CON,aes(x=region,
+                    y=Happiness.Score))+
+stat_summary(fun.data = 'mean_cl_boot',size=1)+
+scale_y_continuous(breaks = seq(6.0,7.5,by=0.5))+
+geom_hline(yintercept = mean(CON$Happiness.Score),
+           linetype='dotted')+
+labs(x='Region',y='Happiness')+
+coord_flip()
+```
+##用ANOVA檢測
+### df＝自由度
+###sum sq(ss)平方和
+###mean sq(ms)均方和
+###p-value越小hypo越不可能為真
+```{r}
+#此推論為開心與地區有關
+anova(m1 <- lm(Happiness.Score ~ region, data = CON))
+```
+##Different region's GDP per cap vs Happiness
+##推測地區差異跟人均GDP有關係
+```{r}
+ggplot(data = CON, aes( group = region, y =Happiness.Score , x =Economy..GDP.per.Capita.)) + geom_point() +
+  stat_smooth(aes(group = region, y =Happiness.Score , x = Economy..GDP.per.Capita., method = 'lm', se = F)) +
+   facet_grid( . ~ region, scales = "free_x") +
+  labs( x = 'GDP per capita', y = 'happiness' )
+#free_x讓電腦自己計算出適當的間距
+```
+#把gdp加進模型
+```{r}
+anova(m2 <- update(m1, . ~ . + Economy..GDP.per.Capita., data = CON))
+```
+#或許跟地區無關
+```{r}
+anova(m3 <- update(m2, . ~ . - region,  data = CON))
+```
+#將ANOVA結果輸出成圖表
+```{r}
+#將結果統一放在一個list
+res_lm<-lapply(list(m1,m2,m3), summary)
+#比較在控制gdp之下，地區的效果
+(res_lm[[2]]$r.sq - res_lm[[3]]$r.sq)/res_lm[[2]]$r.sq
+anova(m3, m2)
+#比較在控制地區狀況下，gdp的效果
+(res_lm[[2]]$r.sq - res_lm[[1]]$r.sq)/res_lm[[1]]$r.sq
+anova(m1,m2)
+```
+#正式畫圖
+```{r}
+library(coefplot)
+m2 <- lm(Happiness.Score ~region +Economy..GDP.per.Capita.- 1, 
+         data = CON)
+coefplot(m2, xlab = 'estimated value', ylab = 'lm_variable', title = 'variable = happiness')
+```
+#將資料語迴歸分析的預測值、殘差與影響度放進資料
+```{r}
+fit_m2 <- data.frame(CON[, c(3, 6, 13)], 
+                     fitted = fitted(m2), 
+                     resid = resid(m2),
+                     infl = influence(m2)$hat )
+```
+
+#依人均GDP疊合真實觀測值與預測值
+```{r}
+library(ggplot2)
+ggplot(data=fit_m2,aes(x=Happiness.Score, group=region))+
+       stat_density(geom='path',position = 'identity') +
+       stat_density(geom='path',posistion='identity',aes(x=fitted))+
+       geom_vline(xintercept = c(with(CON,tapply(Happiness.Score,region,mean ))),linetype='dotted')+
+  facet_grid(region~.)+
+  scale_x_continuous(breaks = seq(1,9,by=1))+
+  labs(x='happiness Score',y='prob dens')
+```  
+
+#看殘差分配，依地區，檢視常態與變異數同質假設
+```{r}
+ggplot(data = fit_m2, aes(x = scale(resid)), group = region ) +
+ stat_density(geom = 'path', position = 'identity', aes(linetype= region,color=region)) +
+ scale_linetype_manual(values = 5:1) +
+ guides(linetype = guide_legend(reverse = TRUE)) +
+ labs(x = 'stand res', y = 'prob dens') +
+ theme(legend.position = c(.15, .8))
+```
+#看看殘差的 Q-Q 圖，依地區。檢視常態假設
+```{r}
+require(lattice)
+qqmath( ~ scale(resid) | region, data = fit_m2 ,type = c("p", "g", "r"),
+       xlab = "norm dig", ylab = "stand res", layout = c(2, 3),
+       pch = '.', cex = 2)
+```
+#畫預測值與殘差的散佈圖，檢查線性與等分散假設    
+```{r}
+require(MASS)
+ggplot(data = fit_m2, aes(x = fitted, y = scale(resid), group = region )) +
+  geom_point(pch = 20, size = 1) +
+  stat_smooth(method = 'rlm', se = F) +
+  facet_grid(region ~ .) +
+  labs(x = 'score prediction', y = 'stand dens')    
+```  
+#呈現影響值（影響估計結果過大的值）與標準化殘差
+```{r}    
+ggplot(data = fit_m2, aes(x = infl, y = scale(resid), group = region)) +
+ geom_text(aes(label = rownames(fit_m2)), cex = 2) +
+ geom_hline(yintercept = 0, linetype = 'dotted') +
+ facet_grid(region ~ .) +
+ labs(x = 'infl rate', y = 'stand res') 
+```
+#看看影響值
+```{r}
+summary(influence(m2)$hat)
+```
+#第三部分：分析其他部分
+```{r}
+dta_happy <- GDP[, c('Happiness.Score','Freedom', 
+                    'Trust..Government.Corruption.','Health..Life.Expectancy.')]
+```
+#看看基本統計
+```{r}
+colMeans(dta_happy)
+```
+#呈現兩兩散佈圖
+```{r}
+require(heplots)
+scatterplotMatrix(~ Happiness.Score +Freedom+Trust..Government.Corruption. + Health..Life.Expectancy., data= dta_happy,
+  pch = '.', cex = 3, smooth = FALSE, reg.line = FALSE, ellipse = TRUE,
+  diagonal = 'none', lower.panel = NULL)
+```
+#我們利用corrplot 套件，以圖形顯示相關性的大小
+```{r}
+require(corrplot)
+corrplot(cor(dta_happy), method = 'ellipse', order = 'hclust', addrect = 4,
+         type = 'upper', tl.pos = 'tp')
+corrplot(cor(dta_happy), add = TRUE, type = 'lower', method = 'number',
+         order = 'hclust', col = 'black', diag = FALSE, tl.pos = 'n', cl.pos = 'n')
+```
+#放進三個解釋變項
+```{r}
+summary(m4 <- lm(Happiness.Score~Freedom+Trust..Government.Corruption. + Health..Life.Expectancy., data=dta_happy))
+```
+#結果
+```{r}
+coefplot(m4, predictors = c('Freedom', 'Trust..Government.Corruption.', 
+                            'Health..Life.Expectancy.'),
+ xlab = 'estimated value', ylab = 'Regression variable', title = 'variable is the happiness score')
+```
+```{r}
+require(effects)
+plot(allEffects(m4), main = '', ylim = c(3, 7), grid = T)
+```
+#利用 lm.beta 套件，計算標準化迴歸係數
+```{r}
+library(lm.beta)
+summary(lm.beta(m4))
+```
+##看看控制信任與預估壽命後，自由的效果
+```{r}
+summary(m5 <- update(m4, . ~ . -Freedom , data = dta_happy))
+```
+```{r}
+anova(m5, m4)
+```
+
+
+

@@ -617,7 +617,10 @@ Western Europe
 library(ggthemes)
 library(viridis)</code></pre>
 <pre><code>## Loading required package: viridisLite</code></pre>
-<pre class="r"><code>ggplot(country_2015, 
+<pre class="r"><code>library(viridisLite)
+
+
+ggplot(country_2015, 
   aes(x = Openness, 
       y = Happiness)) +
   geom_point(aes(colour = Region),

@@ -107,7 +107,7 @@ country_2015 %>%
 library(ggplot2)
 library(ggthemes)
 library(viridis)
-
+library(viridisLite)
 
 
 ggplot(country_2015, 
