@@ -59,7 +59,7 @@
   
 # week-3
 
-[EDA](https://stephanie0324.github.io/cs-summer-school/week-3/hw3part1.html)
+[EDA](https://stephanie0324.github.io/cs-summer-school/week-3/EDA.html)
 
 [tf-idf](https://stephanie0324.github.io/cs-summer-school/week-3/tf-idf.html)
 
@@ -80,4 +80,7 @@
 3. 7/22 寫了10小時因為有檔案放錯資料夾而程式跑不動
 4. 7/23瘋狂debug
 5. 7/23在網路上找資料，處理了一些問題但文字亂碼仍然無法解決
-6.
+
+# week-4
+
+*
