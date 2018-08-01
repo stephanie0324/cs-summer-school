@@ -1,0 +1,37 @@
+---
+title: "gdp"
+author: "stephanie"
+date: "2018/8/1"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+data2017 = read.csv("../week-3/data/2017.csv")
+highgdp<-c(data2017$Economy..GDP.per.Capita.>1)
+hgdp<-data2017[highgdp,]
+lowgdp<-c(data2017$Economy..GDP.per.Capita.<=1)
+lgdp<-data2017[lowgdp,]
+hgdp$GDP="hgdp"
+lgdp$GDP="lgdp"
+GDP=rbind(hgdp,lgdp)
+ne<-c(1,2,3,4,5)
+NE<-data2017[ne,]
+asia<-c(33,79,55,51,26)
+ASIA<-data2017[asia,]
+nra<-c(7,14)
+NRA<-data2017[nra,]
+afr<-c(101,84,95,53,128)
+AFR<-data2017[afr,]
+#使用rbind將同樣欄位的表格接合
+#創一個新欄位來分出兩個表格的不同
+#這樣在group的時候才可以分別
+ASIA$region = "ASIA"
+NE$region = "NE"
+NRA$region="NRA"
+AFR$region="AFR"
+CON = rbind(ASIA, NE,NRA,AFR)
+GDP<-write.csv(GDP,"GDP.csv")
+CON<-write.csv(CON,"CON.csv")
+
+```
