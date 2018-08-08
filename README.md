@@ -125,10 +125,12 @@
 
   [Final project](https://github.com/stephanie0324/summer-class)
   
+  [ppt](https://docs.google.com/presentation/d/1HDvsWNn3TYoXh2smidwdEgO-iuQmwb3GHCux3vWJFZM/edit?usp=sharing)
+   
    我們是第二組
    因為在做作業時，我們開了一個新的repository。
    我們的final作業是在 week6 裡面 afternoonpro 裡的 FP.R。
-   然後ppt是summerfinal.pptx
+
    
    
    
