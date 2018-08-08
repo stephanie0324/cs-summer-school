@@ -122,12 +122,13 @@
    13. 終於把bigrams打出來，kaggle真的是好幫手
    
  # week-6
- 
-  Final Project 
+
+  [Final project](https://github.com/stephanie0324/summer-class)
   
-  [shiny](http://127.0.0.1:5175)
-  
-  [ppt]()
+   我們是第二組
+   因為在做作業時，我們開了一個新的repository。
+   我們的final作業是在 week6 裡面 afternoonpro 裡的 FP.R。
+   然後ppt是summerfinal.pptx
    
    
    
