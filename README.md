@@ -99,5 +99,37 @@
   3. 7/28 上網找尋其他資料，作為最後一週作業的參考資訊
   4. 7/29 做出功課四
   
+ # week-5
+ 
+ * in class
+ 
+   1. 8/1 學shiny
+ 
+ * at home
+   
+   1. 跟組員討論出要做的project的內容
+   2. 我們從新找了一筆新資料
+   3. 分工之後 我開始製作我的文字雲
+   4. 我的inupt有問題 無法輸出 
+   5. 看了一天終於找到問題，本來快要放棄文字雲
+   6. 我的資料無法載入，太大了
+   7. 我看了kaggle 的 code 才順利的把資料載入
+   8. tabset 那邊一直無法載入
+   9. actionbutton也無法使用，好像跟session有關係
+   10. 只能捨棄actionButton
+   11. 試著做新的資料整理法 treemap
+   12. 上網爬了一下bigrams的原理
+   13. 終於把bigrams打出來，kaggle真的是好幫手
+   
+ # week-6
+ 
+  Final Project 
+  
+  [shiny](http://127.0.0.1:5175)
+  
+  [ppt]()
+   
+   
+   
   
 
